@@ -2,7 +2,7 @@ use std::{process, fs, env};
 use std::path::Path;
 
 enum ExitCodes {
-    General = 1,
+    Success = 0,
     CannotExecute = 126
 }
 
@@ -14,15 +14,7 @@ fn main() {
     }
     
     let str_path = if args.len() == 1 { String::from(".") } 
-    else { 
-        match args.nth(1) {
-            Some(path) => path,
-            None => {
-                println!("Something went wrong! Could not get the first arg correctly!");
-                process::exit(ExitCodes::General as i32);
-            }
-        }
-    };
+    else { args.nth(1).expect("Could not get the first arg correctly") };
 
     let path = Path::new(&str_path);
     if let Err(_) = check_symlink(path) {
@@ -38,7 +30,15 @@ fn main() {
         }
     };
 
-    println!("{:?}", metadata);
+    if metadata.is_file() {
+        println!("{}", path.display());
+        process::exit(ExitCodes::Success as i32);
+    }
+    
+    for entry in fs::read_dir(path).expect("Can't get file list") {
+        print!("{} ", entry.unwrap().path().display());
+    }
+    println!("");
 }
 
 fn check_symlink(path: &Path) -> Result<(), ()> {
