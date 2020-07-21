@@ -1,4 +1,4 @@
-use std::{env, process, path, fs};
+use std::{env, process, path, fs, fmt};
 
 pub enum ExitCodes {
     Success = 0,
@@ -8,6 +8,12 @@ pub enum ExitCodes {
 pub struct RsApp {
     path: path::PathBuf,
     metadata: fs::Metadata
+}
+
+impl fmt::Display for RsApp {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "path: \"{}\", metadata: {:?} )", self.path.display(), self.metadata)
+    }
 }
 
 impl RsApp {
@@ -44,7 +50,6 @@ impl RsApp {
         process::exit(ExitCodes::Success as i32);
     }
 }
-
 
 fn get_path(args: &mut env::Args) -> path::PathBuf {
     let str_path = args.nth(1).unwrap_or(String::from("."));
