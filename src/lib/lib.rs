@@ -1,9 +1,6 @@
 use std::{env, process, path, fs, fmt};
 
-pub enum ExitCodes {
-    Success = 0,
-    CannotExecute = 126
-}
+mod util;
 
 pub struct RsApp {
     path: path::PathBuf,
@@ -22,13 +19,13 @@ impl RsApp {
         // Temp: Handle args quantity
         if args.len() > 2 {
             println!("Something went wrong! Multiple directories are not supported yet");
-            process::exit(ExitCodes::CannotExecute as i32);
+            process::exit(util::ExitCodes::CannotExecute as i32);
         }
 
         let path = get_path(&mut args);
         let metadata = path.metadata().unwrap_or_else(|err| {
             println!("Something went wrong for '{}'! {}", path.display(), err);
-            process::exit(ExitCodes::CannotExecute as i32);
+            process::exit(util::ExitCodes::CannotExecute as i32);
         });
 
         RsApp { path, metadata }
@@ -47,7 +44,7 @@ impl RsApp {
     }
 
     fn success(&self) {
-        process::exit(ExitCodes::Success as i32);
+        process::exit(util::ExitCodes::Success as i32);
     }
 }
 
@@ -56,7 +53,7 @@ fn get_path(args: &mut env::Args) -> path::PathBuf {
     let path = path::PathBuf::from(&str_path);
     if let Ok(_) = fs::read_link(&path) {
         println!("Something went wrong! SymLinks are not supported yet");
-        process::exit(ExitCodes::CannotExecute as i32);
+        process::exit(util::ExitCodes::CannotExecute as i32);
     }
     path
 }
