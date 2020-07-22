@@ -16,7 +16,7 @@ impl fmt::Display for RsApp {
 impl RsApp {
     pub fn new() -> RsApp {
         let mut args = env::args();
-        // Temp: Handle args quantity
+        // ToDo: Handle args quantity
         if args.len() > 2 {
             println!("Something went wrong! Multiple directories are not supported yet");
             process::exit(util::ExitCodes::CannotExecute as i32);
@@ -28,17 +28,28 @@ impl RsApp {
             process::exit(util::ExitCodes::CannotExecute as i32);
         });
 
-        RsApp { path, metadata }
+        RsApp { 
+            path: path, 
+            metadata: metadata
+        }
     }
 
     pub fn run(&self) {
         if self.metadata.is_file() {
-            println!("{}\n", self.path.display());
+            let file_name = self.path.file_stem().unwrap();
+            println!("{}\n", file_name.to_str().unwrap());
             self.success();
         }
 
+        self.dir_routine()
+    }
+
+
+    pub fn dir_routine(&self) {
+        // ToDo: Better error handling
         for entry in fs::read_dir(&self.path).expect("Can't get file list") {
-            print!("{} ", entry.unwrap().path().display());
+            let file_name = entry.unwrap().file_name();
+            print!("{} ", file_name.to_str().unwrap());
         }
         println!("");
     }
