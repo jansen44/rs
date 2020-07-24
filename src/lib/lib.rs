@@ -1,6 +1,9 @@
 use std::{env, process, path, fs, fmt};
 
 mod util;
+mod cowmand;
+
+pub use cowmand::{Cowmand};
 
 pub struct RsApp {
     path: path::PathBuf,
