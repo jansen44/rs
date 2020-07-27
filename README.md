@@ -6,5 +6,7 @@
 ---
 
 ## What it intends to be?
-A zero-dependency Rust cli application that can be used as an alternative to unix native ls.
+A zero-dependency Rust alternative to unix ls. This project is based on existing projects, specially (lsd)[https://github.com/Peltoche/lsd] and (Exa)[https://github.com/ogham/exa] as ls alternatives, and (clap)[https://github.com/clap-rs/clap] as the cli control.
 
+## What it is now?
+Right now it can list files as simple as possible and has a base for a possibly robust cli interface based on (clap)[https://github.com/clap-rs/clap]. You can find the roadmap on (this issue)[https://github.com/jansen44/rs/issues/1], this is by no means the final roadmap, I just put ideas there as I code. Many items can be added and some items can be removed as I see them viable or not.
