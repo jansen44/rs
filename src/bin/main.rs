@@ -1,4 +1,5 @@
-use rs::{RsApp, Cowmand, Arg};
+use rs::app::App;
+use rs::cowmand::{Cowmand, Arg};
 
 fn main() {
     let cow = Cowmand::new("rs")
@@ -23,7 +24,7 @@ fn main() {
         );
                 
     println!("{}", cow);
-    let app = RsApp::new();
+    let app = App::new();
     app.run();
 }
 
