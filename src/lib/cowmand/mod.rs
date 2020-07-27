@@ -70,15 +70,12 @@ impl<'cow> Cowmand<'cow> {
         if let None = args.next() { return None; }
 
         for arg in args {
-            // ToDo: Improve this part, probably there are better ways to do
-            // this.
-            if Some(0) == arg.find('-') && arg.len() > 1 {
-                if Some(0) == arg.find("--") && arg.len() > 2 {
-                    let flag = String::from(arg).split_off(2);
-                    let possible_arg = self.find_by_long_command(&flag);
-                    active_args.try_insert_uniq(possible_arg);
-                    continue;
-                }
+            if Some(0) == arg.find("--") && arg.len() > 2 {
+                let flag = String::from(arg).split_off(2);
+                let possible_arg = self.find_by_long_command(&flag);
+                active_args.try_insert_uniq(possible_arg);
+                continue;
+            } else  if Some(0) == arg.find('-') && arg.len() > 1 {
                 let mut arg_iter = arg.chars();
                 arg_iter.next();
                 for flag in arg_iter {

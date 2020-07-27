@@ -2,7 +2,6 @@ use rs::app::App;
 use rs::cowmand::{Cowmand, Arg};
 use rs::util::{ARG_NAME_ALL, ARG_NAME_LIST, ARG_NAME_HELP};
 
-
 fn main() {
     let _cow = Cowmand::new("rs")
         .description("A zero-dependency 'ls' alternative.")
