@@ -20,13 +20,14 @@ impl<'cow> fmt::Display for Cowmand<'cow> {
 
         for a in &self.args {
             if let Some(s) = a.short_command {
-                message.push_str(&format!(" -{}", s));
+                message.push_str(&format!(" -{},", s));
             }
-            if let Some(l) = &a.long_command {
-                message.push_str(&format!(", --{}", l));
+            if let Some(l) = a.long_command {
+                message.push_str(&format!(" --{},", l));
             }
-            if let Some(h) = &a.help {
-                message.push_str(&format!("\t\t {}", h));
+            message.push_str(&format!("\t {}", a.name));
+            if let Some(h) = a.help {
+                message.push_str(&format!("\t- {}", h));
             }
             message.push_str("\n");
         }
