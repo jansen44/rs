@@ -8,7 +8,12 @@ pub struct App {
 
 impl fmt::Display for App {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "path: \"{}\", metadata: {:?} )", self.path.display(), self.metadata)
+        write!(
+            f, 
+            "path: \"{}\", metadata: {:?} )", 
+            self.path.display(), 
+            self.metadata
+        )
     }
 }
 
@@ -17,13 +22,19 @@ impl App {
         let mut args = env::args();
         // ToDo: Handle args quantity
         if args.len() > 2 {
-            println!("Something went wrong! Multiple directories are not supported yet");
+            println!("Something went wrong! Multiple directories \
+                are not supported yet"
+            );
             process::exit(util::ExitCodes::CannotExecute as i32);
         }
 
         let path = get_path(&mut args);
         let metadata = path.metadata().unwrap_or_else(|err| {
-            println!("Something went wrong for '{}'! {}", path.display(), err);
+            println!(
+                "Something went wrong for '{}'! {}", 
+                path.display(), 
+                err
+            );
             process::exit(util::ExitCodes::CannotExecute as i32);
         });
 

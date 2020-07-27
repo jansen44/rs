@@ -4,7 +4,7 @@ use rs::util::{ARG_NAME_ALL, ARG_NAME_LIST, ARG_NAME_HELP};
 
 
 fn main() {
-    let cow = Cowmand::new("rs")
+    let _cow = Cowmand::new("rs")
         .description("A zero-dependency 'ls' alternative.")
         .arg(
             Arg::new(ARG_NAME_LIST)
@@ -24,8 +24,7 @@ fn main() {
                 .long_command("help")
                 .help("show this help message.")
         );
-                
-    println!("{}", cow);
+
     let app = App::new();
     app.run();
 }

@@ -15,18 +15,15 @@ impl<'arg> Arg<'arg> {
     }
 
     pub fn short_command(mut self, short: char) -> Self {
-        self.short_command = Some(short);
-        self
+        self.short_command = Some(short); self
     }
 
     pub fn long_command(mut self, long: &'arg str) -> Self {
-        self.long_command = Some(long);
-        self
+        self.long_command = Some(long); self
     }
 
     pub fn help(mut self, help: &'arg str) -> Self {
-        self.help = Some(help);
-        self
+        self.help = Some(help); self
     }
 }
 
