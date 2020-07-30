@@ -18,7 +18,6 @@ impl<'app> App<'app> {
         let mut show_all = false;
         let mut show_list = false;
         let mut paths = Vec::<path::PathBuf>::new();
-
         if let Some(flags) = cow.active_flags {
             for flag in flags.iter() {
                 match flag.as_str() {
@@ -29,13 +28,9 @@ impl<'app> App<'app> {
                 };
             }
         }
-
         if let Some(args) = cow.active_args {
-            for arg in args.iter() {
-                paths.push(App::get_path(arg));
-            }
+            for arg in args.iter() { paths.push(App::get_path(arg)); }
         }
-        
         App { cow: _cow, show_help, show_all, show_list, paths }
     }
 
@@ -46,47 +41,45 @@ impl<'app> App<'app> {
         }
 
         match self.paths.len() {
-            0 => {
-                match App::path_handler(&App::get_path(".")) {
-                    Err(e) => println!("rs: something went wrong: {}", e),
-                    _ => App::success()
-                };
+            0 => match App::path_handler(&App::get_path(".")) {
+                Err(e) => println!("rs: something went wrong: {}", e),
+                _ => App::success()
             },
-            1 => {
-                match App::path_handler(&self.paths[0]) {
-                    Err(e) => println!("rs: something went wrong: {}", e),
-                    _ => App::success()
-                }
+            1 => match App::path_handler(&self.paths[0]) {
+                Err(e) => println!("rs: something went wrong: {}", e),
+                _ => App::success()
             },
             _ => ()
         };
     }
 
     pub fn path_handler(path: &path::Path) -> io::Result<()> {
+        // ToDo: Better error handling for dangling unwraps
         let metadata = path.metadata()?;
         if metadata.is_file() {
-            let file_name = path.file_name().unwrap();
-            println!("{}\n", file_name.to_str().unwrap());
+            println!(
+                "{}", 
+                path.file_name().unwrap()
+                    .to_str().unwrap()
+            );
             return Ok(());
         }
         App::dir_routine(path)?;
-
         Ok(())
     }
 
     pub fn dir_routine(path: &path::Path) -> io::Result<()> {
+        // ToDo: Better error handling for dangling unwraps
         for entry in fs::read_dir(path)? {
             let unwrapped_entry = entry?;
-            let file_name = unwrapped_entry.file_name();
             let metadata = unwrapped_entry.metadata()?;
             print!(
                 "{}{} ", 
-                file_name.to_str().unwrap(),
+                unwrapped_entry.file_name().to_str().unwrap(),
                 if metadata.is_dir() { "/" } else { "" }
             );
         }
         println!();
-        
         Ok(())
     }
 

@@ -3,7 +3,7 @@ use rs::cowmand::{Cowmand, Arg};
 use rs::util::{ARG_NAME_ALL, ARG_NAME_LIST, ARG_NAME_HELP};
 
 fn main() {
-    let app = App::new(
+    App::new(
         Cowmand::new("rs")
             .description("A zero-dependency 'ls' alternative.")
             .arg(
@@ -25,7 +25,6 @@ fn main() {
                     .help("show this help message.")
             )
             .get_args()
-    );
-    app.run();
+    ).run();
 }
 

@@ -28,8 +28,8 @@ pub struct Cowmand<'cow> {
 impl<'cow> fmt::Display for Cowmand<'cow> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let mut message = String::from(self.name);
-        if let Some(d) = &self.description {
-            message.push_str(&format!(" - {}", d));
+        if let Some(d) = &self.description { 
+            message.push_str(&format!(" - {}", d)); 
         }
         if self.args.len() > 0 { message.push_str("\n\n"); }
         for a in &self.args {
@@ -86,6 +86,7 @@ impl<'cow> Cowmand<'cow> {
             }
             args.try_insert_uniq(Some(String::from(arg)));
         }
+
         self.active_args = if args.len() > 0 { Some(args) } else { None };
         self.active_flags = if flags.len() > 0 { Some(flags) } else { None };
         self
