@@ -16,12 +16,13 @@ impl CowmandVector for Vec<String> {
     }
 }
 
-
-#[derive(Default)]
+#[derive(Default, Debug, Clone)]
 pub struct Cowmand<'cow> {
     name: &'cow str,
     description: Option<&'cow str>,
-    args: Vec<Arg<'cow>>
+    args: Vec<Arg<'cow>>,
+    pub active_flags: Option<Vec<String>>,
+    pub active_args: Option<Vec<String>>
 }
 
 impl<'cow> fmt::Display for Cowmand<'cow> {
@@ -44,16 +45,13 @@ impl<'cow> fmt::Display for Cowmand<'cow> {
             }
             message.push_str("\n");
         }
-        write!(f, "{}\n", message)
+        write!(f, "{}", message)
     }
 }
 
 impl<'cow> Cowmand<'cow> {
     pub fn new(name: &'cow str) -> Self {
-        Cowmand {
-            name: name,
-            ..Default::default()
-        }
+        Cowmand { name, ..Default::default() }
     }
 
     pub fn description(mut self, description: &'cow str) -> Self {
@@ -64,32 +62,34 @@ impl<'cow> Cowmand<'cow> {
         self.args.push(arg); self
     }
 
-    pub fn check_active_args(&self) -> Option<Vec<String>> {
-        let mut args = env::args();
-        let mut active_args = Vec::<String>::new();
-        if let None = args.next() { return None; }
+    pub fn get_args(mut self) -> Self {
+        let mut env_args = env::args();
+        let mut flags = Vec::<String>::new();
+        let mut args = Vec::<String>::new();
+        if let None = env_args.next() { return self; }
 
-        for arg in args {
+        for arg in env_args {
             if Some(0) == arg.find("--") && arg.len() > 2 {
                 let flag = String::from(arg).split_off(2);
                 let possible_arg = self.find_by_long_command(&flag);
-                active_args.try_insert_uniq(possible_arg);
+                flags.try_insert_uniq(possible_arg);
                 continue;
-            } else  if Some(0) == arg.find('-') && arg.len() > 1 {
+            } 
+            if Some(0) == arg.find('-') && arg.len() > 1 {
                 let mut arg_iter = arg.chars();
                 arg_iter.next();
                 for flag in arg_iter {
                     let possible_arg = self.find_by_short_command(flag);
-                    active_args.try_insert_uniq(possible_arg);
+                    flags.try_insert_uniq(possible_arg);
                 }
+                continue;
             }
+            args.try_insert_uniq(Some(String::from(arg)));
         }
-        match active_args {
-            args if args.len() > 0 => Some(args),
-            _ => None
-        }
+        self.active_args = if args.len() > 0 { Some(args) } else { None };
+        self.active_flags = if flags.len() > 0 { Some(flags) } else { None };
+        self
     }
-
 
     fn find_by_short_command(&self, command: char) -> Option<String> {
         let wrapped_arg = &self.args.iter().find(|&arg| {

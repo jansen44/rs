@@ -1,4 +1,4 @@
-#[derive(Default)]
+#[derive(Default, Debug, Clone)]
 pub struct Arg<'arg> {
     pub name: &'arg str,
     pub short_command: Option<char>,
