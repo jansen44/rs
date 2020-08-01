@@ -3,7 +3,7 @@ pub const ARG_NAME_ALL: &str = "All";
 pub const ARG_NAME_HELP: &str = "Help";
 
 pub enum ExitCodes {
-    Success = 0,
-    CannotExecute = 126
+	Success = 0,
+	CannotExecute = 126
 }
 
