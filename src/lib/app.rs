@@ -1,6 +1,6 @@
 use crate::util;
 use crate::cowmand;
-use std::{process, path, fs, io};
+use std::{process, path, fs, io, ffi::OsString};
 
 #[derive(Debug)]
 pub struct App<'app> {
@@ -34,18 +34,18 @@ impl<'app> App<'app> {
 		App { cow: _cow, show_help, show_all, show_list, paths }
 	}
 
-	pub fn run(self) {
+	pub fn run(&self) {
 		if self.show_help {
 			print!("{}", self.cow);
 			App::success();
 		}
 
 		match self.paths.len() {
-			0 => match App::path_handler(&App::get_path(".")) {
+			0 => match self.path_handler(&App::get_path(".")) {
 				Err(e) => println!("rs: something went wrong: {}", e),
 				_ => App::success()
 			},
-			1 => match App::path_handler(&self.paths[0]) {
+			1 => match self.path_handler(&self.paths[0]) {
 				Err(e) => println!("rs: something went wrong: {}", e),
 				_ => App::success()
 			},
@@ -53,7 +53,7 @@ impl<'app> App<'app> {
 		};
 	}
 
-	pub fn path_handler(path: &path::Path) -> io::Result<()> {
+	pub fn path_handler(&self, path: &path::Path) -> io::Result<()> {
 		// ToDo: Better error handling for dangling unwraps
 		let metadata = path.metadata()?;
 		if metadata.is_file() {
@@ -64,23 +64,34 @@ impl<'app> App<'app> {
 			);
 			return Ok(());
 		}
-		App::dir_routine(path)?;
+		self.dir_routine(path)?;
 		Ok(())
 	}
 
-	pub fn dir_routine(path: &path::Path) -> io::Result<()> {
+	pub fn dir_routine(&self, path: &path::Path) -> io::Result<()> {
 		// ToDo: Better error handling for dangling unwraps
 		for entry in fs::read_dir(path)? {
 			let unwrapped_entry = entry?;
-			let metadata = unwrapped_entry.metadata()?;
-			print!(
-				"{}{} ", 
-				unwrapped_entry.file_name().to_str().unwrap(),
-				if metadata.is_dir() { "/" } else { "" }
-			);
+			// ToDo: Better way to check whether the file is hidden or not
+			if App::first_os_string_char(unwrapped_entry.file_name()) != '.' 
+			|| (App::first_os_string_char(unwrapped_entry.file_name()) == '.' && self.show_all) {
+				let metadata = unwrapped_entry.metadata()?;
+				print!(
+					"{}{} ", 
+					unwrapped_entry.file_name().to_str().unwrap(),
+					if metadata.is_dir() { "/" } else { "" }
+				);
+			}
 		}
 		println!();
 		Ok(())
+	}
+
+	pub fn first_os_string_char(file_name: OsString) -> char {
+		match file_name.to_str().unwrap().chars().next() {
+			Some(c) => c,
+			None => ' '
+		}
 	}
 
 	fn get_path(possible_path: &'app str) -> path::PathBuf {
