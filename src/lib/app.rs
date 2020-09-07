@@ -73,8 +73,7 @@ impl<'app> App<'app> {
 		for entry in fs::read_dir(path)? {
 			let unwrapped_entry = entry?;
 			// ToDo: Better way to check whether the file is hidden or not
-			if App::first_os_string_char(unwrapped_entry.file_name()) != '.' 
-			|| (App::first_os_string_char(unwrapped_entry.file_name()) == '.' && self.show_all) {
+			if self.should_display_file(&unwrapped_entry.file_name()) {
 				let metadata = unwrapped_entry.metadata()?;
 				print!(
 					"{}{} ", 
@@ -87,7 +86,12 @@ impl<'app> App<'app> {
 		Ok(())
 	}
 
-	pub fn first_os_string_char(file_name: OsString) -> char {
+	pub fn should_display_file(&self, file_name: &OsString) -> bool {
+		App::first_os_string_char(file_name) != '.' 
+		|| (App::first_os_string_char(file_name) == '.' && self.show_all)
+	}
+
+	pub fn first_os_string_char(file_name: &OsString) -> char {
 		match file_name.to_str().unwrap().chars().next() {
 			Some(c) => c,
 			None => ' '
