@@ -5,7 +5,7 @@ use rs::util::{ARG_NAME_ALL, ARG_NAME_HELP, ARG_NAME_LIST};
 fn main() {
 	App::new(
 		Cowmand::new("rs")
-			.description("A zero-dependency 'ls' alternative.")
+			.description("A (almost) zero-dependency 'ls' alternative.")
 			.arg(
 				Arg::new(ARG_NAME_LIST)
 					.short_command('l')
