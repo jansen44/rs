@@ -9,6 +9,7 @@ use libc::{
 	TIOCGWINSZ
 };
 
+#[derive(Default,Debug)]
 pub struct TermDimensions {
 	pub cols: usize,
 	pub rows: usize

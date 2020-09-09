@@ -1,11 +1,14 @@
 use crate::util;
 use crate::cowmand;
+use crate::terminfo::dim;
+use crate::output::{Entry,Output};
 use std::{process, path, fs, io, ffi::OsString};
 
 #[derive(Debug)]
 pub struct App<'app> {
 	cow: cowmand::Cowmand<'app>,
 	paths: Vec<path::PathBuf>,
+	output: Output,
 	show_help: bool,
 	show_all: bool,
 	show_list: bool
@@ -18,6 +21,7 @@ impl<'app> App<'app> {
 		let mut show_all = false;
 		let mut show_list = false;
 		let mut paths = Vec::<path::PathBuf>::new();
+
 		if let Some(flags) = cow.active_flags {
 			for flag in flags.iter() {
 				match flag.as_str() {
@@ -31,10 +35,18 @@ impl<'app> App<'app> {
 		if let Some(args) = cow.active_args {
 			for arg in args.iter() { paths.push(App::get_path(arg)); }
 		}
-		App { cow: _cow, show_help, show_all, show_list, paths }
+		App { 
+			// Todo: Better error handling
+			output: Output::new(dim().unwrap()),
+			cow: _cow, 
+			show_help, 
+			show_all, 
+			show_list,
+			paths 
+		}
 	}
 
-	pub fn run(&self) {
+	pub fn run(&mut self) {
 		if self.show_help {
 			print!("{}", self.cow);
 			App::success();
@@ -45,15 +57,18 @@ impl<'app> App<'app> {
 				Err(e) => println!("rs: something went wrong: {}", e),
 				_ => App::success()
 			},
-			1 => match self.path_handler(&self.paths[0]) {
-				Err(e) => println!("rs: something went wrong: {}", e),
-				_ => App::success()
+			1 => {
+				let mut path = self.paths[0].clone();
+				match self.path_handler(&mut path) {
+					Err(e) => println!("rs: something went wrong: {}", e),
+					_ => App::success()
+				}
 			},
 			_ => ()
 		};
 	}
 
-	pub fn path_handler(&self, path: &path::Path) -> io::Result<()> {
+	pub fn path_handler(&mut self, path: &path::Path) -> io::Result<()> {
 		// ToDo: Better error handling for dangling unwraps
 		let metadata = path.metadata()?;
 		if metadata.is_file() {
@@ -68,21 +83,24 @@ impl<'app> App<'app> {
 		Ok(())
 	}
 
-	pub fn dir_routine(&self, path: &path::Path) -> io::Result<()> {
+	pub fn dir_routine(&mut self, path: &path::Path) -> io::Result<()> {
 		// ToDo: Better error handling for dangling unwraps
-		let dir_entries = fs::read_dir(path)?.filter(|entry| {
-			self.should_display_file(&entry.as_ref().unwrap().file_name())
-		});
-		for entry in dir_entries {
+		for entry in fs::read_dir(path)? {
 			let unwrapped_entry = entry?;
-			let metadata = unwrapped_entry.metadata()?;
-			print!(
-				"{}{} ", 
-				unwrapped_entry.file_name().to_str().unwrap(),
-				if metadata.is_dir() { "/" } else { "" }
-			);
+			if self.should_display_file(&unwrapped_entry.file_name()) {
+				let metadata = unwrapped_entry.metadata()?;
+				self.output.add(
+					Entry::new(
+						format!(
+							"{}{}", 
+							unwrapped_entry.file_name().to_str().unwrap(),
+							if metadata.is_dir() { "/" } else { "" }
+						)
+					)
+				);
+			}
 		}
-		println!();
+		println!("{:?}", self.output);
 		Ok(())
 	}
 
