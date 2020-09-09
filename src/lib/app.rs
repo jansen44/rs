@@ -100,7 +100,7 @@ impl<'app> App<'app> {
 				);
 			}
 		}
-		println!("{:?}", self.output);
+		println!("{}", self.output);
 		Ok(())
 	}
 

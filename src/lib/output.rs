@@ -8,7 +8,13 @@ pub struct Entry {
 
 impl Debug for Entry {
 	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}({})", self.content, self.length)			
+        write!(f, "{}({})", self.content, self.length)
+    }
+}
+
+impl fmt::Display for Entry {
+	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.content)
     }
 }
 
@@ -45,6 +51,17 @@ impl Debug for Output {
 			self.length_sum,
 			self.term_dimensions
 		)
+    }
+}
+
+impl fmt::Display for Output {
+	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+		for entry in &self.entries {
+			if let Err(e) = write!(f, "{} ", entry) {
+				return Err(e);
+			}
+		}
+		Ok(())
     }
 }
 
