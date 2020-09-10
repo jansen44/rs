@@ -1,4 +1,5 @@
 use crate::terminfo::TermDimensions;
+use crate::util::COLS_MULTIPLIER_FOR_GRID;
 use std::{fmt, fmt::Debug};
 
 #[derive(Clone,Eq,Ord,PartialEq,PartialOrd)]
@@ -79,17 +80,32 @@ impl Output {
 		}
 	}
 
-	pub fn print(&mut self, dir_first: bool) {		
+	pub fn print(&mut self, dir_first: bool) {
 		let output_entries = Self::get_output_entries(
 			&mut self.dir_entries, 
 			&mut self.entries, 
 			dir_first
 		);
+		if self.length_sum as f32 > (
+			self.term_dimensions.cols as f32 * COLS_MULTIPLIER_FOR_GRID
+		) {
+			Self::print_grid(&output_entries);
+		} else {
+			Self::print_line(&output_entries);
+		}
+	}
 
-		for entry in output_entries {
+	fn print_grid(entries: &Vec<Entry>) {
+		for entry in entries {
 			print!("{} ", entry);
 		}
+		println!("GRID!");
+	}
 
+	fn print_line(entries: &Vec<Entry>) {
+		for entry in entries {
+			print!("{} ", entry);
+		}
 		println!();
 	}
 
