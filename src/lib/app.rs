@@ -11,7 +11,8 @@ pub struct App<'app> {
 	output: Output,
 	show_help: bool,
 	show_all: bool,
-	show_list: bool
+	show_list: bool,
+	show_dirs_first: bool
 }
 
 impl<'app> App<'app> {
@@ -20,6 +21,7 @@ impl<'app> App<'app> {
 		let mut show_help = false;
 		let mut show_all = false;
 		let mut show_list = false;
+		let mut show_dirs_first = true;
 		let mut paths = Vec::<path::PathBuf>::new();
 
 		if let Some(flags) = cow.active_flags {
@@ -28,6 +30,7 @@ impl<'app> App<'app> {
 					util::ARG_NAME_HELP => show_help = true,
 					util::ARG_NAME_ALL  => show_all  = true,
 					util::ARG_NAME_LIST => show_list = true,
+					util::ARG_NAME_DIR_FIRST => show_dirs_first = false,
 					_ => ()
 				};
 			}
@@ -42,6 +45,7 @@ impl<'app> App<'app> {
 			show_help, 
 			show_all, 
 			show_list,
+			show_dirs_first,
 			paths 
 		}
 	}
@@ -95,12 +99,13 @@ impl<'app> App<'app> {
 							"{}{}", 
 							unwrapped_entry.file_name().to_str().unwrap(),
 							if metadata.is_dir() { "/" } else { "" }
-						)
+						),
+						metadata.is_dir()
 					)
 				);
 			}
 		}
-		println!("{}", self.output);
+		self.output.print(self.show_dirs_first);
 		Ok(())
 	}
 

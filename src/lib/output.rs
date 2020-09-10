@@ -1,8 +1,10 @@
 use crate::terminfo::TermDimensions;
 use std::{fmt, fmt::Debug};
 
+#[derive(Clone,Eq,Ord,PartialEq,PartialOrd)]
 pub struct Entry {
 	pub content: String,
+	pub is_dir: bool,
 	pub length: usize,
 }
 
@@ -19,10 +21,11 @@ impl fmt::Display for Entry {
 }
 
 impl Entry {
-	pub fn new(content: String) -> Self {
+	pub fn new(content: String, is_dir: bool) -> Self {
 		Entry {
 			length: content.len(),
-			content: content,
+			content,
+			is_dir
 		}
 	}
 }
@@ -30,6 +33,7 @@ impl Entry {
 #[derive(Default)]
 pub struct Output {
 	pub entries: Vec<Entry>,
+	pub dir_entries: Vec<Entry>,
 	pub longest_length: usize,
 	pub columns: usize,
 	pub length_sum: usize,
@@ -54,17 +58,6 @@ impl Debug for Output {
     }
 }
 
-impl fmt::Display for Output {
-	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-		for entry in &self.entries {
-			if let Err(e) = write!(f, "{} ", entry) {
-				return Err(e);
-			}
-		}
-		Ok(())
-    }
-}
-
 impl Output {
 	pub fn new(term_dimensions: TermDimensions) -> Self {
 		Output { 
@@ -79,6 +72,38 @@ impl Output {
 			self.longest_length = entry.length;
 		}
 		self.columns = self.term_dimensions.cols / self.longest_length;
-		self.entries.push(entry);
+		if entry.is_dir {
+			self.dir_entries.push(entry);
+		} else {
+			self.entries.push(entry);
+		}
+	}
+
+	pub fn print(&mut self, dir_first: bool) {		
+		let output_entries = Self::get_output_entries(
+			&mut self.dir_entries, 
+			&mut self.entries, 
+			dir_first
+		);
+
+		for entry in output_entries {
+			print!("{} ", entry);
+		}
+
+		println!();
+	}
+
+	fn get_output_entries(
+		dir_entries: &mut Vec<Entry>, 
+		entries: &mut Vec<Entry>,
+		dir_first: bool
+	) -> Vec<Entry> {
+		if dir_first {
+			dir_entries.sort();	entries.sort();
+			dir_entries.append(entries);
+			return dir_entries.clone();
+		}
+		dir_entries.append(entries);
+		dir_entries.sort();	dir_entries.clone()
 	}
 }

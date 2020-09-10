@@ -1,6 +1,11 @@
 use rs::app::App;
 use rs::cowmand::{Arg, Cowmand};
-use rs::util::{ARG_NAME_ALL, ARG_NAME_HELP, ARG_NAME_LIST};
+use rs::util::{
+	ARG_NAME_ALL, 
+	ARG_NAME_HELP, 
+	ARG_NAME_LIST,
+	ARG_NAME_DIR_FIRST
+};
 
 fn main() {
 	App::new(
@@ -23,6 +28,11 @@ fn main() {
 					.short_command('h')
 					.long_command("help")
 					.help("show this help message."),
+			)
+			.arg(
+				Arg::new(ARG_NAME_DIR_FIRST)
+					.short_command('d')
+					.long_command("no-dir")
 			)
 			.get_args(),
 	)
