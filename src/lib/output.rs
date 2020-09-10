@@ -1,18 +1,11 @@
 use crate::terminfo::TermDimensions;
-use crate::util::COLS_MULTIPLIER_FOR_GRID;
-use std::{fmt, fmt::Debug};
+use std::fmt;
 
 #[derive(Clone,Eq,Ord,PartialEq,PartialOrd)]
 pub struct Entry {
 	pub content: String,
 	pub is_dir: bool,
 	pub length: usize,
-}
-
-impl Debug for Entry {
-	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}({})", self.content, self.length)
-    }
 }
 
 impl fmt::Display for Entry {
@@ -39,24 +32,6 @@ pub struct Output {
 	pub columns: usize,
 	pub length_sum: usize,
 	pub term_dimensions: TermDimensions
-}
-
-impl Debug for Output {
-	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(
-			f, 
-			"entries: {:?}\n\
-			columns: {}\n\
-			longest_length: {}\n\
-			length_sum: {}\n\
-			term_dimensions: {:?}", 
-			self.entries,
-			self.columns,
-			self.longest_length,
-			self.length_sum,
-			self.term_dimensions
-		)
-    }
 }
 
 impl Output {
@@ -86,20 +61,35 @@ impl Output {
 			&mut self.entries, 
 			dir_first
 		);
-		if self.length_sum as f32 > (
-			self.term_dimensions.cols as f32 * COLS_MULTIPLIER_FOR_GRID
-		) {
-			Self::print_grid(&output_entries);
+		if self.length_sum > self.term_dimensions.cols {
+			Self::print_grid(
+				&output_entries, 
+				self.columns, 
+				self.longest_length
+			);
 		} else {
 			Self::print_line(&output_entries);
 		}
 	}
 
-	fn print_grid(entries: &Vec<Entry>) {
-		for entry in entries {
-			print!("{} ", entry);
+	fn print_grid(
+		entries: &Vec<Entry>, 
+		columns: usize, 
+		longest_length: usize
+	) {
+		let mut entries_iter = entries.iter().peekable();
+		while entries_iter.peek() != None {
+			let mut i = 0;
+			while i < columns && entries_iter.peek() != None {
+				print!(
+					"{content:<width$} ", 
+					content=entries_iter.next().unwrap().content,
+					width=longest_length
+				);
+				i += 1;
+			}
+			println!();
 		}
-		println!("GRID!");
 	}
 
 	fn print_line(entries: &Vec<Entry>) {
