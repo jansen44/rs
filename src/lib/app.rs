@@ -8,7 +8,6 @@ use std::{process, path, fs, io, ffi::OsString};
 pub struct App<'app> {
 	cow: cowmand::Cowmand<'app>,
 	paths: Vec<path::PathBuf>,
-	output: Output,
 	show_help: bool,
 	show_all: bool,
 	show_list: bool,
@@ -39,8 +38,6 @@ impl<'app> App<'app> {
 			for arg in args.iter() { paths.push(App::get_path(arg)); }
 		}
 		App { 
-			// Todo: Better error handling
-			output: Output::new(dim().unwrap()),
 			cow: _cow, 
 			show_help, 
 			show_all, 
@@ -89,11 +86,12 @@ impl<'app> App<'app> {
 
 	pub fn dir_routine(&mut self, path: &path::Path) -> io::Result<()> {
 		// ToDo: Better error handling for dangling unwraps
+		let mut output = Output::new(dim()?);
 		for entry in fs::read_dir(path)? {
 			let unwrapped_entry = entry?;
 			if self.should_display_file(&unwrapped_entry.file_name()) {
 				let metadata = unwrapped_entry.metadata()?;
-				self.output.add(
+				output.add(
 					Entry::new(
 						format!(
 							"{}{}", 
@@ -105,7 +103,7 @@ impl<'app> App<'app> {
 				);
 			}
 		}
-		self.output.print(self.show_dirs_first);
+		output.print(self.show_dirs_first);
 		Ok(())
 	}
 

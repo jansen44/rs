@@ -8,6 +8,7 @@ use libc::{
 	STDOUT_FILENO, 
 	TIOCGWINSZ
 };
+use std::io;
 
 #[derive(Default,Debug)]
 pub struct TermDimensions {
@@ -15,14 +16,19 @@ pub struct TermDimensions {
 	pub rows: usize
 }
 
-pub fn dim() -> Result<TermDimensions, &'static str> {
+pub fn dim() -> Result<TermDimensions, io::Error> {
 	let window = get_term_size_any();
 	match window {
 		Some(win) => Ok(TermDimensions { 
 			cols: win.ws_col as usize, 
 			rows: win.ws_row as usize 
 		}),
-		None => Err("Unable to check window dimensions.")
+		None => Err(
+			io::Error::new(
+				io::ErrorKind::PermissionDenied,
+				"Unable to check window dimensions."
+			)
+		)
 	}
 }
 
