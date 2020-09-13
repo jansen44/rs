@@ -94,9 +94,8 @@ impl<'app> App<'app> {
 				output.add(
 					Entry::new(
 						format!(
-							"{}{}", 
+							"{}", 
 							unwrapped_entry.file_name().to_str().unwrap(),
-							if metadata.is_dir() { "/" } else { "" }
 						),
 						metadata.is_dir()
 					)
