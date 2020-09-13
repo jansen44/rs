@@ -1,4 +1,5 @@
 use crate::terminfo::TermDimensions;
+use crate::color::{Colors};
 use std::fmt;
 
 #[derive(Clone,Eq,Ord,PartialEq,PartialOrd)]
@@ -81,10 +82,9 @@ impl Output {
 		while entries_iter.peek() != None {
 			let mut i = 0;
 			while i < columns && entries_iter.peek() != None {
-				print!(
-					"{content:<width$} ", 
-					content=entries_iter.next().unwrap().content,
-					width=longest_length
+				Output::colorful_output(
+					entries_iter.next().unwrap(), 
+					Some(longest_length)
 				);
 				i += 1;
 			}
@@ -94,9 +94,29 @@ impl Output {
 
 	fn print_line(entries: &Vec<Entry>) {
 		for entry in entries {
-			print!("{} ", entry);
+			Output::colorful_output(entry, None);
 		}
 		println!();
+	}
+
+	fn colorful_output(entry: &Entry, width: Option<usize>) {
+		if let Some(width) = width {
+			print!(
+				"{}{content:<width$} ",
+				Output::get_fg_color(entry),
+				content=entry.content,
+				width=width
+			);
+		} else {
+			print!("{}{} ", Output::get_fg_color(entry), entry);
+		}
+	}
+
+	fn get_fg_color(entry: &Entry) -> String {
+		if entry.is_dir { 
+			return Colors::LightCyan.fg() 
+		}
+		Colors::White.fg()
 	}
 
 	fn get_output_entries(
